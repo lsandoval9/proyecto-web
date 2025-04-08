@@ -1,81 +1,92 @@
 <template>
-    <div>
-        <h1>Gestión de Calificaciones</h1>
 
-        <!-- Sección para Registrar o Editar Calificación -->
-        <div class="form-section">
-            <h2>{{ editingGrade ? 'Editar Calificación' : 'Registrar Nueva Calificación' }}</h2>
+    <Head title="Gestion de calificaciones" />
 
-            <!-- Mensaje de éxito -->
-            <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-             <!-- Mensaje de error general -->
-            <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <AuthenticatedLayout>
+        <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                Calificaciones
+            </h2>
+        </template>
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+        <div>
+            <!-- Sección para Registrar o Editar Calificación -->
+            <div class="form-section">
+                <h2>{{ editingGrade ? 'Editar Calificación' : 'Registrar Nueva Calificación' }}</h2>
 
-            <!-- Formulario: Usamos v-if para no mostrarlo mientras hay mensaje de éxito -->
-            <form @submit.prevent="editingGrade ? updateGrade() : addGrade()" v-if="!successMessage">
-                <!-- Selector de Estudiante (Deshabilitado en modo edición) -->
-                <div>
-                    <label for="student_id">Estudiante:</label>
-                    <select id="student_id" v-model="currentGrade.student_id" required :disabled="isSubmitting || !!editingGrade">
-                        <option value="" disabled>-- Seleccione Estudiante --</option>
-                        <option v-for="student in studentsList" :key="student.id" :value="student.id">
-                            {{ student.last_name }}, {{ student.first_name }}
-                        </option>
-                    </select>
-                     <!-- Mostrar nombre si está en modo edición -->
-                    <span v-if="editingGrade" class="readonly-info">
+                <!-- Mensaje de éxito -->
+                <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+                <!-- Mensaje de error general -->
+                <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+
+                <!-- Formulario: Usamos v-if para no mostrarlo mientras hay mensaje de éxito -->
+                <form @submit.prevent="editingGrade ? updateGrade() : addGrade()" v-if="!successMessage">
+                    <!-- Selector de Estudiante (Deshabilitado en modo edición) -->
+                    <div>
+                        <label for="student_id">Estudiante:</label>
+                        <select id="student_id" v-model="currentGrade.student_id" required :disabled="isSubmitting || !!editingGrade">
+                            <option value="" disabled>-- Seleccione Estudiante --</option>
+                            <option v-for="student in studentsList" :key="student.id" :value="student.id">
+                                {{ student.last_name }}, {{ student.first_name }}
+                            </option>
+                        </select>
+                        <!-- Mostrar nombre si está en modo edición -->
+                        <span v-if="editingGrade" class="readonly-info">
                         {{ editingGrade.student?.last_name }}, {{ editingGrade.student?.first_name }}
                     </span>
-                    <span v-if="formErrors.student_id" class="error-text">{{ formErrors.student_id[0] }}</span>
-                </div>
+                        <span v-if="formErrors.student_id" class="error-text">{{ formErrors.student_id[0] }}</span>
+                    </div>
 
-                <!-- Selector de Asignatura (Deshabilitado en modo edición) -->
-                <div>
-                    <label for="subject_id">Asignatura:</label>
-                    <select id="subject_id" v-model="currentGrade.subject_id" required :disabled="isSubmitting || !!editingGrade">
-                        <option value="" disabled>-- Seleccione Asignatura --</option>
-                        <option v-for="subject in subjectsList" :key="subject.id" :value="subject.id">
-                            {{ subject.name }} ({{ subject.code }})
-                        </option>
-                    </select>
-                     <!-- Mostrar nombre si está en modo edición -->
-                    <span v-if="editingGrade" class="readonly-info">
+                    <!-- Selector de Asignatura (Deshabilitado en modo edición) -->
+                    <div>
+                        <label for="subject_id">Asignatura:</label>
+                        <select id="subject_id" v-model="currentGrade.subject_id" required :disabled="isSubmitting || !!editingGrade">
+                            <option value="" disabled>-- Seleccione Asignatura --</option>
+                            <option v-for="subject in subjectsList" :key="subject.id" :value="subject.id">
+                                {{ subject.name }} ({{ subject.code }})
+                            </option>
+                        </select>
+                        <!-- Mostrar nombre si está en modo edición -->
+                        <span v-if="editingGrade" class="readonly-info">
                         {{ editingGrade.subject?.name }} ({{ editingGrade.subject?.code }})
                     </span>
-                    <span v-if="formErrors.subject_id" class="error-text">{{ formErrors.subject_id[0] }}</span>
-                </div>
+                        <span v-if="formErrors.subject_id" class="error-text">{{ formErrors.subject_id[0] }}</span>
+                    </div>
 
-                <!-- Input de Calificación (Editable en ambos modos) -->
-                <div>
-                    <label for="grade">Calificación (0-20):</label>
-                    <input type="number" id="grade" step="0.01" min="0" max="20" v-model="currentGrade.grade" required :disabled="isSubmitting">
-                    <span v-if="formErrors.grade" class="error-text">{{ formErrors.grade[0] }}</span>
-                </div>
+                    <!-- Input de Calificación (Editable en ambos modos) -->
+                    <div>
+                        <label for="grade">Calificación (0-20):</label>
+                        <input type="number" id="grade" step="0.01" min="0" max="20" v-model="currentGrade.grade" required :disabled="isSubmitting">
+                        <span v-if="formErrors.grade" class="error-text">{{ formErrors.grade[0] }}</span>
+                    </div>
 
-                <!-- Botones de Acción del Formulario -->
-                <div class="form-actions">
-                    <button type="submit" :disabled="isSubmitting">
-                        {{ isSubmitting ? (editingGrade ? 'Actualizando...' : 'Registrando...') : (editingGrade ? 'Actualizar Calificación' : 'Registrar Calificación') }}
-                    </button>
-                    <button type="button" v-if="editingGrade" @click="cancelEdit" :disabled="isSubmitting" class="btn-secondary">
-                        Cancelar Edición
-                    </button>
-                </div>
-            </form>
+                    <!-- Botones de Acción del Formulario -->
+                    <div class="form-actions">
+                        <button type="submit" :disabled="isSubmitting">
+                            {{ isSubmitting ? (editingGrade ? 'Actualizando...' : 'Registrando...') : (editingGrade ? 'Actualizar Calificación' : 'Registrar Calificación') }}
+                        </button>
+                        <button type="button" v-if="editingGrade" @click="cancelEdit" :disabled="isSubmitting" class="btn-secondary">
+                            Cancelar Edición
+                        </button>
+                    </div>
+                </form>
 
-            <!-- Botón para mostrar el formulario de nuevo después de un éxito -->
-             <button v-if="successMessage" @click="resetForm(true)">Registrar/Editar otra</button>
-        </div>
+                <!-- Botón para mostrar el formulario de nuevo después de un éxito -->
+                <button v-if="successMessage" @click="resetForm(true)">Registrar/Editar otra</button>
+            </div>
 
-        <hr>
+            <hr>
 
-        <!-- Sección para Mostrar Calificaciones Existentes -->
-        <div class="list-section">
-            <h2>Calificaciones Registradas</h2>
-            <div v-if="isLoadingGrades">Cargando calificaciones...</div>
-            <div v-else-if="grades.length === 0">No hay calificaciones registradas.</div>
-            <table v-else class="data-table">
-                <thead>
+            <!-- Sección para Mostrar Calificaciones Existentes -->
+            <div class="list-section">
+                <h2>Calificaciones Registradas</h2>
+                <div v-if="isLoadingGrades">Cargando calificaciones...</div>
+                <div v-else-if="grades.length === 0">No hay calificaciones registradas.</div>
+                <table v-else class="data-table">
+                    <thead>
                     <tr>
                         <th>Estudiante</th>
                         <th>Asignatura</th>
@@ -83,8 +94,8 @@
                         <th>Fecha Registro</th>
                         <th>Acciones</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <tr v-for="grade in grades" :key="grade.id">
                         <td>{{ grade.student?.first_name }} {{ grade.student?.last_name }}</td>
                         <td>{{ grade.subject?.name }} ({{ grade.subject?.code }})</td>
@@ -96,17 +107,22 @@
                             <button @click="confirmDeleteGrade(grade.id)" class="action-btn delete-btn" title="Eliminar Calificación">Eliminar</button>
                         </td>
                     </tr>
-                </tbody>
-            </table>
-             <!-- Controles de paginación (si se implementan) -->
-             <!-- <div v-if="pagination.lastPage > 1"> ... </div> -->
-        </div>
+                    </tbody>
+                </table>
+                <!-- Controles de paginación (si se implementan) -->
+                <!-- <div v-if="pagination.lastPage > 1"> ... </div> -->
+            </div>
 
-    </div>
+        </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
 </template>
 
 <script>
 import axios from 'axios';
+import {Head} from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 // Objeto vacío para el estado inicial del formulario
 const initialGradeState = {
@@ -116,6 +132,7 @@ const initialGradeState = {
 };
 
 export default {
+    components: {AuthenticatedLayout, Head},
     data() {
         return {
             grades: [], // Lista de calificaciones

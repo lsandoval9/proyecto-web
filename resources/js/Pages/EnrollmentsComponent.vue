@@ -1,87 +1,107 @@
 <template>
-    <div>
-        <h1>Gestión de Matrículas</h1>
 
-        <!-- Sección para Registrar Nueva Matrícula -->
-        <div class="form-section">
-            <h2>Registrar Nueva Matrícula</h2>
-            <!-- Mensaje de éxito general -->
-            <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-             <!-- Mensaje de error general -->
-            <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+    <Head title="Gestion de Matriculas" />
 
-            <form @submit.prevent="addEnrollment" v-if="!successMessage"> <!-- Oculta form al éxito si quieres -->
-                <!-- Selector de Estudiante -->
-                <div>
-                    <label for="student_id">Estudiante:</label>
-                    <select id="student_id" v-model="newEnrollment.student_id" required :disabled="isSubmitting">
-                        <option value="" disabled>-- Seleccione Estudiante --</option>
-                        <option v-for="student in studentsList" :key="student.id" :value="student.id">
-                            {{ student.last_name }}, {{ student.first_name }}
-                        </option>
-                    </select>
-                    <span v-if="formErrors.student_id" class="error-text">{{ formErrors.student_id[0] }}</span>
-                </div>
+    <AuthenticatedLayout>
 
-                <!-- Selector de Asignatura -->
-                <div>
-                    <label for="subject_id">Asignatura:</label>
-                    <select id="subject_id" v-model="newEnrollment.subject_id" required :disabled="isSubmitting">
-                        <option value="" disabled>-- Seleccione Asignatura --</option>
-                        <option v-for="subject in subjectsList" :key="subject.id" :value="subject.id">
-                            {{ subject.name }} ({{ subject.code }})
-                        </option>
-                    </select>
-                    <span v-if="formErrors.subject_id" class="error-text">{{ formErrors.subject_id[0] }}</span>
-                </div>
+        <template #header>
+            <h2
+                class="text-xl font-semibold leading-tight text-gray-800"
+            >
+                Matriculas
+            </h2>
+        </template>
+        <div class="py-12">
+            <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
+        <div>
 
-                <button type="submit" :disabled="isSubmitting">
-                    {{ isSubmitting ? 'Matriculando...' : 'Matricular Estudiante' }}
-                </button>
-            </form>
-             <button v-if="successMessage" @click="resetForm">Registrar otra matrícula</button>
-        </div>
+            <!-- Sección para Registrar Nueva Matrícula -->
+            <div class="form-section">
+                <h2>Registrar Nueva Matrícula</h2>
+                <!-- Mensaje de éxito general -->
+                <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
+                <!-- Mensaje de error general -->
+                <div v-if="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
-        <hr>
+                <form @submit.prevent="addEnrollment" v-if="!successMessage"> <!-- Oculta form al éxito si quieres -->
+                    <!-- Selector de Estudiante -->
+                    <div>
+                        <label for="student_id">Estudiante:</label>
+                        <select id="student_id" v-model="newEnrollment.student_id" required :disabled="isSubmitting">
+                            <option value="" disabled>-- Seleccione Estudiante --</option>
+                            <option v-for="student in studentsList" :key="student.id" :value="student.id">
+                                {{ student.last_name }}, {{ student.first_name }}
+                            </option>
+                        </select>
+                        <span v-if="formErrors.student_id" class="error-text">{{ formErrors.student_id[0] }}</span>
+                    </div>
 
-        <!-- Sección para Mostrar Matrículas Existentes -->
-        <div class="list-section">
-            <h2>Matrículas Registradas</h2>
-             <div v-if="isLoading">Cargando matrículas...</div>
-             <div v-else-if="enrollments.length === 0">No hay matrículas registradas.</div>
-             <table v-else class="enrollment-table">
-                 <thead>
-                     <tr>
-                         <th>Estudiante</th>
-                         <th>Asignatura</th>
-                         <th>Fecha Matrícula</th>
-                         <th>Acciones</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     <tr v-for="enrollment in enrollments" :key="enrollment.id">
-                         <td>{{ enrollment.student?.first_name }} {{ enrollment.student?.last_name }}</td>
-                         <td>{{ enrollment.subject?.name }} ({{ enrollment.subject?.code }})</td>
-                         <td>{{ formatDate(enrollment.created_at) }}</td>
-                         <td>
+                    <!-- Selector de Asignatura -->
+                    <div>
+                        <label for="subject_id">Asignatura:</label>
+                        <select id="subject_id" v-model="newEnrollment.subject_id" required :disabled="isSubmitting">
+                            <option value="" disabled>-- Seleccione Asignatura --</option>
+                            <option v-for="subject in subjectsList" :key="subject.id" :value="subject.id">
+                                {{ subject.name }} ({{ subject.code }})
+                            </option>
+                        </select>
+                        <span v-if="formErrors.subject_id" class="error-text">{{ formErrors.subject_id[0] }}</span>
+                    </div>
+
+                    <button type="submit" :disabled="isSubmitting">
+                        {{ isSubmitting ? 'Matriculando...' : 'Matricular Estudiante' }}
+                    </button>
+                </form>
+                <button v-if="successMessage" @click="resetForm">Registrar otra matrícula</button>
+            </div>
+
+            <hr>
+
+            <!-- Sección para Mostrar Matrículas Existentes -->
+            <div class="list-section">
+                <h2>Matrículas Registradas</h2>
+                <div v-if="isLoading">Cargando matrículas...</div>
+                <div v-else-if="enrollments.length === 0">No hay matrículas registradas.</div>
+                <table v-else class="enrollment-table">
+                    <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Asignatura</th>
+                        <th>Fecha Matrícula</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="enrollment in enrollments" :key="enrollment.id">
+                        <td>{{ enrollment.student?.first_name }} {{ enrollment.student?.last_name }}</td>
+                        <td>{{ enrollment.subject?.name }} ({{ enrollment.subject?.code }})</td>
+                        <td>{{ formatDate(enrollment.created_at) }}</td>
+                        <td>
                             <button @click="showEnrollmentDetails(enrollment)" class="action-btn view-btn">Ver</button>
                             <!-- El botón de editar podría llamar a un método 'prepareEdit(enrollment)' -->
                             <!-- <button @click="prepareEdit(enrollment)" class="action-btn edit-btn">Editar</button> -->
                             <button @click="confirmDeleteEnrollment(enrollment.id)" class="action-btn delete-btn">Eliminar</button>
-                         </td>
-                     </tr>
-                 </tbody>
-             </table>
-             <!-- Aquí podrías añadir controles de paginación si usas ->paginate() -->
-        </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- Aquí podrías añadir controles de paginación si usas ->paginate() -->
+            </div>
 
-    </div>
+        </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+
 </template>
 
 <script>
 import axios from 'axios';
+import {Head} from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 export default {
+    components: {AuthenticatedLayout, Head},
     data() {
         return {
             enrollments: [], // Lista de matrículas existentes

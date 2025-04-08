@@ -1,15 +1,30 @@
-import { createApp } from 'vue';
+import '../css/app.css';
+import './bootstrap';
 
-import StudentManager from './components/StudentsComponent.vue';
-import SubjectManager from './components/SubjectsComponent.vue';
-import EnrollmentManager from './components/EnrollmentsComponent.vue';
-import GradeManager from './components/GradesComponent.vue';
+import { createInertiaApp } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { createApp, h } from 'vue';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-const app = createApp({});
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-app.component('student-manager', StudentManager);
-app.component('subject-manager', SubjectManager);
-app.component('enrollment-manager', EnrollmentManager);
-app.component('grade-manager', GradeManager);
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob('./Pages/**/*.vue'),
+        ),
+    setup({ el, App, props, plugin }) {
 
-app.mount('#app');
+        console.log(el)
+
+        return createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(ZiggyVue)
+            .mount(el);
+    },
+    progress: {
+        color: '#4B5563',
+    },
+});
