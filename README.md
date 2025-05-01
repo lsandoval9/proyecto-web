@@ -19,6 +19,7 @@ Para ejecutar el sistema, primero debes clonar el repositorio y luego instalar l
 Tambien debemos crear un usuario por defecto.
 Para ello, ejecutamos el siguiente comando:
 ```bash
+    php artisan migrate
   php artisan db:seed --class= CreateUser
 ```
 
@@ -30,3 +31,8 @@ Ahora podemos ejecutar el servidor de desarrollo de Laravel y el servidor de des
 ```
 
 Si accedemos a la URL `http://localhost:8000`, deberíamos ver la página de inicio del sistema de gestión académica.
+
+el usuario por defecto es:
+
+- email: miguel@mail.com
+- password: 1234
