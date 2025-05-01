@@ -5,14 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::redirect('/', '/dashboard')->name('home');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -22,19 +15,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::inertia('/students', 'StudentsComponent')->name('students.index');
+
+    Route::inertia('/subjects', 'SubjectsComponent')->name('subjects.index');
+
+    Route::inertia('/enrollments', 'EnrollmentsComponent')->name('enrollments.index');
+
+    Route::inertia('/grades', 'GradesComponent')->name('grades.index');
 });
 
 
-Route::inertia("/", function () {
-    return redirect("dashboard");
-})->name("home");
-
-Route::inertia('/students', 'StudentsComponent')->name('students.index');
-
-Route::inertia('/subjects', 'SubjectsComponent')->name('subjects.index');
-
-Route::inertia('/enrollments', 'EnrollmentsComponent')->name('enrollments.index');
-
-Route::inertia('/grades', 'GradesComponent')->name('grades.index');
 
 require __DIR__.'/auth.php';
